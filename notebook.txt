@@ -1,0 +1,72 @@
+将3DResNet50各个块之间的卷及特征使用双线性融合的方式整合作为分类的特征
+在split2和split3上做训练 CUDA_VISIBLE_DEVICES=1,2 python main.py --root_path ~/data --video_path ucf101_videos/jpg --annotation_path ucf101_01.json --result_path split2 --dataset ucf101 --n_classes 400 --n_finetune_classes 101 --pretrain_path resnext-101-64f-kinetics.pth --ft_begin_index 4 --model resnext --model_depth 101 --resnet_shortcut B --batch_size 128 --n_threads 4 --checkpoint 1 --sample_duration 64
+在log31上做训练 CUDA_VISIBLE_DEVICES=3 python main.py --root_path /data/users/yangke/data --video_path kinetics_videos/jpg --annotation_path kinetics.json --result_path ./log31 --dataset ucf101 --model resnext --model_depth 101 --n_classes 101 --batch_size 48 --n_threads 4 --checkpoint 1 --resume_path save_17.pth --resnet_shortcut B --learning_rate 0.1 --sample_duration 64
+
+nohup CUDA_VISIBLE_DEVICES=6,7 python main.py --root_path /data/users/yangke/data --video_path kinetics_videos/jpg --annotation_path kinetics.json --result_path ./log28 --dataset ucf101 --model resnext --model_depth 101 --n_classes 101 --batch_size 48 --n_threads 4 --checkpoint 1 --pretrain_path resnext-101-64f-kinetics-ucf101_split1.pth --resnet_shortcut B --learning_rate 0.1 --sample_duration 64 &
+
+CUDA_VISIBLE_DEVICES=3 python main.py --root_path /data/users/yangke/data --video_path kinetics_videos/jpg --annotation_path kinetics.json --result_path ./log23 --dataset ucf101 --model resnet --model_depth 50 --n_classes 101 --batch_size 96 --n_threads 4 --checkpoint 1 --pretrain_path  --resnet_shortcut B --learning_rate 0.1 --weight_decay 1e-5 --lr_patience
+
+CUDA_VISIBLE_DEVICES=0 python main.py --root_path ~/data --video_path kinetics_videos/jpg --annotation_path kinetics.json --result_path ./test_64 --dataset ucf101 --model resnext --model_depth 101 --n_classes 101 --batch_size 24 --n_threads 4 --checkpoint 5 --resume_path ./log25_2/save_47.pth --no_train --no_val --resnet_shortcut B --test --sample_duration 64  
+
+CUDA_VISIBLE_DEVICES=0 python main.py --root_path ~/data --video_path kinetics_videos/jpg --annotation_path kinetics.json --result_path ./test_64 --dataset hmdb51 --model resnext --model_depth 101 --n_classes 51 --batch_size 24 --n_threads 4 --checkpoint 5 --resume_path log29/save_44.pth --no_train --resnet_shortcut B --test --sample_duration 64 
+
+CUDA_VISIBLE_DEVICES=1 python my_model.py --root_path /data/users/yangke/data --video_path kinetics_videos/jpg --annotation_path kinetics.json --result_path ./log25 --dataset ucf101 --model resnext --model_depth 101 --n_classes 101 --batch_size 96 --n_threads 4 --checkpoint 5 --pretrain_path resnext-101-64f-kinetics-ucf101_split1.pth --resnet_shortcut B --learning_rate 0.1
+
+yuan:0.114723764208 0.8484
+log14:0.109172614327 0.8525
+直接使用global poolling和双线性池化
+log17:0.111287338091 0.8536
+log17:0.114459423738 0.8533
+log16:0.11075865715  0.8511
+log16:0.112609040444 0.8526959914863427 122
+log16:0.111816019033 0.8526073075558709 106
+log16:0.112080359503 0.8525186236253991 125
+log16:0.111287338091 0.8524299396949273 139
+log16:0.112873380915 0.8522525718339837 200
+log16:0.108908273857 0.8521638879035118 121
+log16:0.113666402326 0.85207520397304 63
+log16: 0.8521638879035118 169
+1*1的卷积改变channel的数量和只有时间的上采样，双线性池化
+log18:0.112080359503 0.8526073075558709 190
+log18:0.112873380915 0.85207520397304 168
+
+log19:0.11075865715 0.8552678254700248 200
+log19:0.109701295268 0.8542923022348351 163
+log19:0.109701295268 0.8537601986520043 122
+log19:0.11075865715 0.8536715147215325 128
+log19:0.106529209622 0.8533167789996453 119
+log19:0.111022997621 0.8528733593472863 175
+log19:0.113137721385 0.8527846754168145 182
+log19:0.111287338091 0.8524299396949273 143
+log19:0.134813639968 0.8326534231997162 35
+1*1的卷积和时间维度的上采样element-wise相乘
+log21:0.112344699974 0.853848882582476  174
+log21:0.108908273857 0.8535828307910607 93
+log21:0.111287338091 0.8530507272082298 182
+log12:0.108908273857 0.852962043277758  103
+log21:0.108908273857 0.8528733593472863 177
+log21:0.108115252445 0.8526959914863427 112
+log21:0.108908273857 0.8526073075558709 92
+log21:0.11075865715  0.8523412557644555 91
+log21:0.108643933386 0.8522525718339837 101
+log21:0.111551678562 0.85207520397304   89
+log21:0.112609040444 0.8524299396949273 148
+将log16的双线性池化改为时间上的池化
+
+使用0.1训练的layer4层而且训练的还是Kinect的预训练模型，一样会跑偏，训练集95%，而验证集79%，
+真的想不通到底是为啥，又使用了0.01的学习率试了一下
+
+resnext在UCF101 split1上错误率0.0674068199841 64帧 val=3时0.0639703938673
+在验证集上的准确率是0.4762717585036627 0.8726626487405347
+log25:0.0637060533968 0.8745170761860609 32 val=3使得准确率0.0618556701031
+log25:0.0668781390431
+log30：41 0.8356366945352055 0.875135218667903 val=3时的准确率0.0626486915147
+log30:39 0.8424599839406374 0.8731648895070314 val=3时的准确率0.0621200105736
+resnext在hmdb51 split1上的错误率0.28431372549 64帧 当val=3时0.285620915033
+在验证集上的准确率是1.7155286883272105 0.5319304028143125
+      epoch loss            acc               Error@1    
+log29:54 1.8029288853971235 0.539409881786201 0.270588235294
+log29:67 1.7590699949925839 0.5413114442366811 0.27385620915
+log29:85 1.7544958551508143 0.5447342566475454 0.266666666667 val=0时的准确率0.281699346405
+log29:98 1.745493186353991 0.5433714702247013 0.270588235294
+正经的三个全连接的双线性池化

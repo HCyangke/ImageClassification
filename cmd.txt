@@ -1,0 +1,9 @@
+CUDA_VISIBLE_DEVICES=0 python main.py --root_path ~/data --video_path ucf101_videos/jpg --annotation_path ucf101_01.json --result_path resnet18_ucf101 --dataset ucf101 --n_classes 400 --n_finetune_classes 101 --pretrain_path pretrained/resnet-18-kinetics.pth --ft_begin_index 4 --model resnet --model_depth 18 --resnet_shortcut A --batch_size 16 --n_threads 4 --checkpoint 1
+traning resnet18 resnet18_ucf101
+CUDA_VISIBLE_DEVICES=0 python main.py --root_path ~/data --video_path ucf101_videos/jpg --annotation_path ucf101_01.json --result_path resnet18_ucf101 --dataset ucf101 --n_classes 400 --n_finetune_classes 101 --pretrain_path pretrained/resnet-18-kinetics.pth --ft_begin_index 4 --model resnet --model_depth 18 --resnet_shortcut A --batch_size 32 --n_threads 4 --checkpoint 1
+
+training resnet18 resnet18_ucf101_v2
+CUDA_VISIBLE_DEVICES=0 python main.py --root_path ~/data --video_path ucf101_videos/jpg --annotation_path ucf101_01.json --result_path resnet18_ucf101_v2 --dataset ucf101 --n_classes 400 --n_finetune_classes 101 --pretrain_path pretrained/resnet-18-kinetics.pth --ft_begin_index 5 --model resnet --model_depth 18 --resnet_shortcut A --batch_size 32 --n_threads 4 --checkpoint 1
+
+
+CUDA_VISIBLE_DEVICES=0 python demo.py --result_path test --n_classes 2 --model resnet --model_depth 18 --resume_path lr0.01_ft4_r18_all_data_43_Threshold/save_11.pth
